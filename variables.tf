@@ -8,7 +8,7 @@ variable "project" {
 }
 
 variable "contact" {
-  default = "email@londonappdev.com"
+  default = "manjunathr.cloud@gmail.com"
 }
 
 variable "aws_region" {
