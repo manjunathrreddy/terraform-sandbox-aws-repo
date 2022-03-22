@@ -15,6 +15,9 @@ variable "aws_region" {
   default = "us-east-1"
 }
 
+variable "bastion_key_name" {
+  default = "terraform-key"
+}
 
 /*
 variable "db_username" {
@@ -25,9 +28,6 @@ variable "db_password" {
   description = "Password for the RDS postgres instance"
 }
 
-variable "bastion_key_name" {
-  default = "recipe-app-api-devops-bastion"
-}
 
 variable "ecr_image_api" {
   description = "ECR image for API"
