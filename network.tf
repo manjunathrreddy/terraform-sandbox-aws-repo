@@ -3,12 +3,12 @@ resource "aws_vpc" "sandbox_vpc" {
   enable_dns_support   = true
   enable_dns_hostnames = true
 
-  tags = merge(local.common_tags, tomap({"Name" = "${local.prefix}-main"}))
+  tags = merge(local.common_tags, tomap({ "Name" = "${local.prefix}-sandbox_vpc" }))
 }
 
 resource "aws_internet_gateway" "sandbox_igw" {
   vpc_id = aws_vpc.sandbox_vpc.id
-  tags = merge(local.common_tags, tomap({"Name" = "${local.prefix}-main"}))
+  tags   = merge(local.common_tags, tomap({ "Name" = "${local.prefix}-sandbox_igw" }))
 
 }
 
@@ -21,13 +21,13 @@ resource "aws_subnet" "sandbox_subnet_public_a" {
   vpc_id                  = aws_vpc.sandbox_vpc.id
   availability_zone       = "${data.aws_region.current.name}a"
 
-  tags = merge(local.common_tags, tomap({"Name" = "${local.prefix}-main"}))
+  tags = merge(local.common_tags, tomap({ "Name" = "${local.prefix}-public" }))
 }
 
 resource "aws_route_table" "public_rt_a" {
   vpc_id = aws_vpc.sandbox_vpc.id
 
-  tags = merge(local.common_tags, tomap({"Name" = "${local.prefix}-main"}))
+  tags = merge(local.common_tags, tomap({ "Name" = "${local.prefix}-public" }))
 }
 
 resource "aws_route_table_association" "public_rta_a" {
@@ -42,15 +42,15 @@ resource "aws_route" "public_internet_access_a" {
 }
 
 resource "aws_eip" "public_eip_a" {
-  vpc = true
-  tags = merge(local.common_tags, tomap({"Name" = "${local.prefix}-main"}))
+  vpc  = true
+  tags = merge(local.common_tags, tomap({ "Name" = "${local.prefix}-public" }))
 }
 
 resource "aws_nat_gateway" "public_ng_a" {
   allocation_id = aws_eip.public_eip_a.id
   subnet_id     = aws_subnet.sandbox_subnet_public_a.id
 
- tags = merge(local.common_tags, tomap({"Name" = "${local.prefix}-main"}))
+  tags = merge(local.common_tags, tomap({ "Name" = "${local.prefix}-public" }))
 }
 resource "aws_subnet" "sandbox_subnet_public_b" {
   cidr_block              = "10.1.2.0/24"
@@ -58,13 +58,13 @@ resource "aws_subnet" "sandbox_subnet_public_b" {
   vpc_id                  = aws_vpc.sandbox_vpc.id
   availability_zone       = "${data.aws_region.current.name}b"
 
-  tags = merge(local.common_tags, tomap({"Name" = "${local.prefix}-main"}))
+  tags = merge(local.common_tags, tomap({ "Name" = "${local.prefix}-public" }))
 }
 
 resource "aws_route_table" "public_rt_b" {
   vpc_id = aws_vpc.sandbox_vpc.id
 
-  tags = merge(local.common_tags, tomap({"Name" = "${local.prefix}-main"}))
+  tags = merge(local.common_tags, tomap({ "Name" = "${local.prefix}-public" }))
 
 }
 
@@ -82,7 +82,7 @@ resource "aws_route" "public_internet_access_b" {
 resource "aws_eip" "public_eip_b" {
   vpc = true
 
-  tags = merge(local.common_tags, tomap({"Name" = "${local.prefix}-main"}))
+  tags = merge(local.common_tags, tomap({ "Name" = "${local.prefix}-public" }))
 }
 
 
@@ -90,73 +90,58 @@ resource "aws_nat_gateway" "public_ng_b" {
   allocation_id = aws_eip.public_eip_b.id
   subnet_id     = aws_subnet.sandbox_subnet_public_b.id
 
-  tags = merge(local.common_tags, tomap({"Name" = "${local.prefix}-main"}))
+  tags = merge(local.common_tags, tomap({ "Name" = "${local.prefix}-public" }))
 }
-/*
+
 ###################################################
 # Private Subnets - Outbound internet access only #
 ###################################################
-resource "aws_subnet" "private_a" {
+resource "aws_subnet" "sandbox_subnet_private_a" {
   cidr_block        = "10.1.10.0/24"
-  vpc_id            = aws_vpc.main.id
+  vpc_id            = aws_vpc.sandbox_vpc.id
   availability_zone = "${data.aws_region.current.name}a"
 
-  tags = merge(
-    local.common_tags,
-    map("Name", "${local.prefix}-private-a")
-  )
+  tags = merge(local.common_tags, tomap({ "Name" = "${local.prefix}-private" }))
 }
 
-resource "aws_route_table" "private_a" {
-  vpc_id = aws_vpc.main.id
+resource "aws_route_table" "private_rt_a" {
+  vpc_id = aws_vpc.sandbox_vpc.id
 
-  tags = merge(
-    local.common_tags,
-    map("Name", "${local.prefix}-private-a")
-  )
+  tags = merge(local.common_tags, tomap({ "Name" = "${local.prefix}-private" }))
 }
 
-resource "aws_route_table_association" "private_a" {
-  subnet_id      = aws_subnet.private_a.id
-  route_table_id = aws_route_table.private_a.id
+resource "aws_route_table_association" "private_rta_a" {
+  subnet_id      = aws_subnet.sandbox_subnet_private_a.id
+  route_table_id = aws_route_table.private_rt_a.id
 }
 
 resource "aws_route" "private_a_internet_out" {
-  route_table_id         = aws_route_table.private_a.id
-  nat_gateway_id         = aws_nat_gateway.public_a.id
+  route_table_id         = aws_route_table.private_rt_a.id
+  nat_gateway_id         = aws_nat_gateway.public_ng_a.id
   destination_cidr_block = "0.0.0.0/0"
 }
 
-resource "aws_subnet" "private_b" {
+resource "aws_subnet" "sandbox_subnet_private_b" {
   cidr_block        = "10.1.11.0/24"
-  vpc_id            = aws_vpc.main.id
+  vpc_id            = aws_vpc.sandbox_vpc.id
   availability_zone = "${data.aws_region.current.name}b"
 
-  tags = merge(
-    local.common_tags,
-    map("Name", "${local.prefix}-private-b")
-  )
+  tags = merge(local.common_tags, tomap({ "Name" = "${local.prefix}-private" }))
 }
 
-resource "aws_route_table" "private_b" {
-  vpc_id = aws_vpc.main.id
+resource "aws_route_table" "private_rt_b" {
+  vpc_id = aws_vpc.sandbox_vpc.id
 
-  tags = merge(
-    local.common_tags,
-    map("Name", "${local.prefix}-private-b")
-  )
+  tags = merge(local.common_tags, tomap({ "Name" = "${local.prefix}-private" }))
 }
 
-resource "aws_route_table_association" "private_b" {
-  subnet_id      = aws_subnet.private_b.id
-  route_table_id = aws_route_table.private_b.id
+resource "aws_route_table_association" "private_rta_b" {
+  subnet_id      = aws_subnet.sandbox_subnet_private_b.id
+  route_table_id = aws_route_table.private_rt_b.id
 }
 
 resource "aws_route" "private_b_internet_out" {
-  route_table_id         = aws_route_table.private_b.id
-  nat_gateway_id         = aws_nat_gateway.public_b.id
+  route_table_id         = aws_route_table.private_rt_b.id
+  nat_gateway_id         = aws_nat_gateway.public_ng_b.id
   destination_cidr_block = "0.0.0.0/0"
 }
-
-
-*/
